@@ -1,100 +1,56 @@
-// Import libraries
-import React from "react"
-import { useTranslation, useI18next } from "gatsby-plugin-react-i18next"
-import { MdSearch } from "react-icons/md"
-import {
-  IconButton,
-  forwardRef,
-  Portal,
-  useDisclosure,
-  IconButtonProps,
-  useToken,
-  useMediaQuery,
-  useMergeRefs,
-} from "@chakra-ui/react"
+import { useRef } from "react"
+import dynamic from "next/dynamic"
+import { useRouter } from "next/router"
+import { useTranslation } from "next-i18next"
 import { useDocSearchKeyboardEvents } from "@docsearch/react"
 import { DocSearchHit } from "@docsearch/react/dist/esm/types"
-import SearchButton from "./SearchButton"
-import SearchModal from "./SearchModal"
-import { sanitizeHitUrl } from "../../utils/url"
-import { sanitizeHitTitle } from "../../utils/sanitizeHitTitle"
+import * as Portal from "@radix-ui/react-portal"
 
-// Styles
-import "@docsearch/css"
+import { trackCustomEvent } from "@/lib/utils/matomo"
+import { sanitizeHitTitle } from "@/lib/utils/sanitizeHitTitle"
+import { sanitizeHitUrl } from "@/lib/utils/url"
 
-// Utils
-import { trackCustomEvent } from "../../utils/matomo"
+import { useDisclosure } from "@/hooks/useDisclosure"
 
-export const SearchIconButton = forwardRef<IconButtonProps, "button">(
-  (props, ref) => (
-    <IconButton
-      ref={ref}
-      icon={<MdSearch />}
-      fontSize="2xl"
-      variant="icon"
-      _hover={{ svg: { fill: "primary" } }}
-      {...props}
-    />
-  )
-)
+const SearchModal = dynamic(() => import("./SearchModal"))
 
-const Search = forwardRef<{}, "button">((_, ref) => {
-  const searchButtonRef = React.useRef<HTMLButtonElement>(null)
-  const { isOpen, onClose, onOpen } = useDisclosure()
+type Props = {
+  children: (props: ReturnType<typeof useDisclosure>) => React.ReactNode
+}
 
-  const mergedButtonRefs = useMergeRefs(ref, searchButtonRef)
+const Search = ({ children }: Props) => {
+  const disclosure = useDisclosure()
+  const { isOpen, onOpen, onClose } = disclosure
+
+  const { locale } = useRouter()
+  const searchButtonRef = useRef<HTMLButtonElement>(null)
+  const { t } = useTranslation("common")
+
+  const handleOpen = () => {
+    onOpen()
+    trackCustomEvent({
+      eventCategory: "nav bar",
+      eventAction: "click",
+      eventName: "search open",
+    })
+  }
 
   useDocSearchKeyboardEvents({
     isOpen,
-    onOpen,
+    onOpen: handleOpen,
     onClose,
     searchButtonRef,
   })
-  const { t } = useTranslation()
-  const { language } = useI18next()
-  const appId = process.env.GATSBY_ALGOLIA_APP_ID || ""
-  const apiKey = process.env.GATSBY_ALGOLIA_SEARCH_KEY || ""
-  const indexName =
-    process.env.GATSBY_ALGOLIA_BASE_SEARCH_INDEX_NAME || "ethereumorg"
 
-  // Check for the breakpoint with theme token
-  const xlBp = useToken("breakpoints", "xl")
-  const [isLargerThanXl] = useMediaQuery(`(min-width: ${xlBp})`)
+  const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || ""
+  const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || ""
+  const indexName =
+    process.env.NEXT_PUBLIC_ALGOLIA_BASE_SEARCH_INDEX_NAME || "ethereumorg"
 
   return (
     <>
-      {isLargerThanXl ? (
-        <SearchButton
-          ref={mergedButtonRefs}
-          onClick={() => {
-            onOpen()
-            trackCustomEvent({
-              eventCategory: "nav bar",
-              eventAction: "click",
-              eventName: "search open",
-            })
-          }}
-          translations={{
-            buttonText: t("search"),
-            buttonAriaLabel: t("search"),
-          }}
-        />
-      ) : (
-        <SearchIconButton
-          onClick={() => {
-            onOpen()
-            trackCustomEvent({
-              eventCategory: "nav bar",
-              eventAction: "click",
-              eventName: "search open",
-            })
-          }}
-          ref={mergedButtonRefs}
-          aria-label={t("aria-toggle-search-button")}
-          size="sm"
-        />
-      )}
-      <Portal>
+      {children({ ...disclosure, onOpen: handleOpen })}
+      <Portal.Root>
         {isOpen && (
           <SearchModal
             apiKey={apiKey}
@@ -102,14 +58,14 @@ const Search = forwardRef<{}, "button">((_, ref) => {
             indexName={indexName}
             onClose={onClose}
             searchParameters={{
-              facetFilters: [`lang:${language}`],
+              facetFilters: [`lang:${locale}`],
             }}
             transformItems={(items) =>
               items.map((item: DocSearchHit) => {
                 const newItem: DocSearchHit = structuredClone(item)
                 newItem.url = sanitizeHitUrl(item.url)
-                newItem._highlightResult.hierarchy.lvl0.value =
-                  sanitizeHitTitle(item._highlightResult.hierarchy.lvl0.value)
+                const newTitle = sanitizeHitTitle(item.hierarchy.lvl0 || "")
+                newItem.hierarchy.lvl0 = newTitle
                 return newItem
               })
             }
@@ -160,9 +116,9 @@ const Search = forwardRef<{}, "button">((_, ref) => {
             }}
           />
         )}
-      </Portal>
+      </Portal.Root>
     </>
   )
-})
+}
 
 export default Search

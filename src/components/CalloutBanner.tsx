@@ -1,70 +1,60 @@
-import React from "react"
-import { GatsbyImage, IGatsbyImageData } from "gatsby-plugin-image"
-import { Flex, FlexProps, Heading, Image, Text } from "@chakra-ui/react"
+import { useTranslation } from "next-i18next"
 
-import Translation from "./Translation"
-import { TranslationKey } from "../utils/translations"
+import type { TranslationKey } from "@/lib/types"
 
-export interface IProps extends FlexProps {
-  children?: React.ReactNode
-  image: IGatsbyImageData
-  maxImageWidth?: number
+import { type ImageProps, TwImage } from "@/components/Image"
+
+import { cn } from "@/lib/utils/cn"
+
+export type CalloutBannerProps = React.HTMLAttributes<HTMLDivElement> & {
+  image: ImageProps["src"]
+  imageWidth?: number
   titleKey: TranslationKey
   descriptionKey: TranslationKey
   alt: string
 }
 
-const CalloutBanner: React.FC<IProps> = ({
+const CalloutBanner = ({
   image,
-  maxImageWidth,
+  imageWidth,
   titleKey,
   descriptionKey,
   alt,
   children,
-  ...restProps
-}) => (
-  <Flex
-    as="aside"
-    direction={{ base: "column", lg: "row-reverse" }}
-    bg="layer2Gradient"
-    p={{ base: 8, sm: 12 }}
-    borderRadius="base"
-    {...restProps}
-  >
-    <Image
-      as={GatsbyImage}
-      image={image}
-      alt={alt}
-      objectFit="contain"
-      alignSelf="center"
-      w="full"
-      maxW={`${maxImageWidth}px`}
-      mt={-24}
-      mb={{ base: 0, lg: -24 }}
-    />
-    <Flex
-      flexGrow={1}
-      flexShrink={0}
-      flexBasis="50%"
-      direction="column"
-      justifyContent="center"
-      pl={{ base: 0, sm: 4, lg: 8 }}
-      w={{ base: "full", lg: "inherit" }}
+  className,
+  ...props
+}: CalloutBannerProps) => {
+  const { t } = useTranslation("page-staking")
+
+  return (
+    <aside
+      className={cn(
+        "flex flex-col rounded p-8 sm:p-12 lg:flex-row-reverse",
+        "bg-gradient-to-r from-accent-a/10 to-accent-c/10 dark:from-accent-a/20 dark:to-accent-c-hover/20",
+        className
+      )}
+      {...props}
     >
-      <Heading
-        as="h2"
-        mt={0}
-        fontSize={{ base: "2xl", sm: "2rem" }}
-        lineHeight="1.4"
-      >
-        <Translation id={titleKey} />
-      </Heading>
-      <Text fontSize="xl" w="90%" lineHeight="140%" mb={8} color="text200">
-        <Translation id={descriptionKey} />
-      </Text>
-      {children}
-    </Flex>
-  </Flex>
-)
+      <div className="flex">
+        <TwImage
+          src={image}
+          alt={alt}
+          width={imageWidth}
+          className="-my-24 mx-auto object-contain max-lg:mb-0"
+        />
+      </div>
+
+      <div className="flex w-full flex-shrink-0 flex-grow basis-1/2 flex-col justify-center sm:ps-4 lg:w-[inherit] lg:ps-8">
+        <h2 className="mb-8 text-2xl leading-xs sm:text-[2rem]">
+          {t(titleKey)}
+        </h2>
+        <p className="mb-8 w-[90%] text-xl text-body-medium">
+          {t(descriptionKey)}
+        </p>
+        {children}
+      </div>
+    </aside>
+  )
+}
 
 export default CalloutBanner
