@@ -1140,6 +1140,17 @@ const chains = [
     shortName: "robinhoodchain",
   },
   {
+    name: "Robinhood Chain",
+    infoURL: "https://docs.robinhood.com/chain",
+    chainId: 4663,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    chain: "ETH",
+  },
+  {
     name: "OEV Network",
     infoURL: "https://api3.org/oev/",
     chainId: 4913,
