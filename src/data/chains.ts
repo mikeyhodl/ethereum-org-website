@@ -1332,6 +1332,17 @@ const chains = [
     shortName: "acme-mainnet",
   },
   {
+    name: "ACME Mainnet Stealth",
+    infoURL: "",
+    chainId: 8224,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    chain: "ASM",
+  },
+  {
     name: "B3",
     infoURL: "https://b3.fun",
     chainId: 8333,
