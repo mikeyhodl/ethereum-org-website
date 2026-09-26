@@ -2509,6 +2509,17 @@ const chains = [
     shortName: "maki",
   },
   {
+    name: "MAKI Chain",
+    infoURL: "https://makiai.app",
+    chainId: 8000008,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    chain: "MAKI",
+  },
+  {
     name: "Hokum",
     infoURL: "https://hokum.gg",
     chainId: 8080808,
