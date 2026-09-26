@@ -2040,6 +2040,17 @@ const chains = [
     shortName: "nil",
   },
   {
+    name: "Nillion Network",
+    infoURL: "https://nillion.com/",
+    chainId: 98875,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    chain: "ETH",
+  },
+  {
     name: "Sova",
     infoURL: "https://sova.io",
     chainId: 100021,
@@ -2315,6 +2326,17 @@ const chains = [
     },
     chain: "bokuto",
     shortName: "bokuto",
+  },
+  {
+    name: "bokuto",
+    infoURL: "https://katana.network",
+    chainId: 737373,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    chain: "bokuto",
   },
   {
     name: "katana",
